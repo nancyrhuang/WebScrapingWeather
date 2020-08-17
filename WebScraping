@@ -1,0 +1,225 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Huang_Rui_ps3.ipynb",
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "bz31oj5D4CH7",
+        "colab_type": "text"
+      },
+      "source": [
+        "# Web Scraping Weather.com "
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "zPckW9Ce4bjB",
+        "colab_type": "text"
+      },
+      "source": [
+        "## Importing Necessary Libraries"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "wfiFY9-GjCvb",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "import pandas as pd\n",
+        "from bs4 import BeautifulSoup\n",
+        "import requests"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Md9npLYVHCoO",
+        "colab_type": "text"
+      },
+      "source": [
+        "# Creating function "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "79O6uSrFsJaO",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "def weather(zipcode):\n",
+        "  '''\n",
+        "  produces information from weather.com based on zipcode\n",
+        "  input: zipcode\n",
+        "  output: city, state, zipcode, temperature\n",
+        "  '''\n",
+        "  #convert zipcode intro string\n",
+        "  zipcode = str(zipcode)\n",
+        "\n",
+        "  # input zipcode into url\n",
+        "  url = 'https://weather.com/weather/today/l/X:4:US'\n",
+        "  zipcode_url = url.replace('X',zipcode)\n",
+        "  response = requests.get(zipcode_url)\n",
+        "\n",
+        "  # make sure valid zipcode\n",
+        "  try:\n",
+        "    response.status_code == 200\n",
+        "\n",
+        "    response = requests.get(zipcode_url)\n",
+        "    soup = BeautifulSoup(response.content,'html.parser')\n",
+        "\n",
+        "    # to produce city, state, zipcode\n",
+        "    location = soup.find_all(class_ = 'today_nowcard-location')\n",
+        "    city_state = location[0].text\n",
+        "    print('Location: ', city_state, zipcode)\n",
+        "\n",
+        "    # to produce temperature\n",
+        "    temp = soup.find_all(class_ = 'today_nowcard-temp')\n",
+        "    current_temp = temp[0].text\n",
+        "    print('Temperature: ', current_temp)\n",
+        "\n",
+        "    # to produce link just in case user wants more information\n",
+        "    print('For more information, click here: ', zipcode_url)\n",
+        "\n",
+        "  except:\n",
+        "    print('Not a valid zipcode!')\n",
+        "\n",
+        "  return\n"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "hKIBWVqU47UN",
+        "colab_type": "text"
+      },
+      "source": [
+        "# Testing zip codes in different formats"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "80ykZQYpJQPK",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 68
+        },
+        "outputId": "0b839a2e-f92a-4b84-f23c-e26634d48845"
+      },
+      "source": [
+        "weather(92122)"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Location:  San Diego, CA 92122\n",
+            "Temperature:  76°\n",
+            "For more information, click here:  https://weather.com/weather/today/l/92122:4:US\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "SPBvRoRxv1aB",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 68
+        },
+        "outputId": "33f2e599-d580-4b70-8db7-2a222a1ffbc2"
+      },
+      "source": [
+        "weather('07450')"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Location:  Ridgewood, NJ 07450\n",
+            "Temperature:  47°\n",
+            "For more information, click here:  https://weather.com/weather/today/l/07450:4:US\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "AcLvFWPmwAgR",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "32947d56-711c-4155-d424-d20eca12d44b"
+      },
+      "source": [
+        "weather(123)"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Not a valid zipcode!\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "KX7_lps6wBwD",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "8042e31b-e880-4617-edad-501f9b951ba0"
+      },
+      "source": [
+        "weather(00000)"
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Not a valid zipcode!\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    }
+  ]
+}
